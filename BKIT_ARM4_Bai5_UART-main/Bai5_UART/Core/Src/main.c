@@ -71,6 +71,7 @@ struct dateTime {
 	int x_axis;
 	int y_axis;
 	uint8_t *showName;
+	uint8_t stopValue;
 	uint16_t  fontColor;
 	uint16_t  bgColor;
 	uint8_t writeName;
@@ -81,13 +82,13 @@ struct dateTime {
 };
 
 struct dateTime dateTimeInfo[7] = {
-		{70, 100, &ds3231_hours, GREEN, BLACK, ADDRESS_HOUR, 0, "HOUR", 0, 23},
-		{110, 100, &ds3231_min, GREEN, BLACK, ADDRESS_MIN, 0, "MIN", 0, 59},
-		{150, 100, &ds3231_sec, GREEN, BLACK, ADDRESS_SEC, 0, "SEC", 0, 59},
-		{20, 130, &ds3231_day, YELLOW, BLACK, ADDRESS_DAY, 0, "DAY", 1, 7},
-		{70, 130, &ds3231_date, YELLOW, BLACK, ADDRESS_DATE, 0, "DATE", 1, 31},
-		{110, 130, &ds3231_month, YELLOW, BLACK, ADDRESS_MONTH, 0, "MONTH", 1, 12},
-		{150, 130, &ds3231_year, YELLOW, BLACK, ADDRESS_YEAR, 0, "YEAR", 0, 99},
+		{70, 100, &ds3231_hours, 0, GREEN, BLACK, ADDRESS_HOUR, 0, "HOUR", 0, 23},
+		{110, 100, &ds3231_min, 0, GREEN, BLACK, ADDRESS_MIN, 0, "MIN", 0, 59},
+		{150, 100, &ds3231_sec, 0, GREEN, BLACK, ADDRESS_SEC, 0, "SEC", 0, 59},
+		{20, 130, &ds3231_day, 0, YELLOW, BLACK, ADDRESS_DAY, 0, "DAY", 1, 7},
+		{70, 130, &ds3231_date, 0, YELLOW, BLACK, ADDRESS_DATE, 0, "DATE", 1, 31},
+		{110, 130, &ds3231_month, 0, YELLOW, BLACK, ADDRESS_MONTH, 0, "MONTH", 1, 12},
+		{150, 130, &ds3231_year, 0, YELLOW, BLACK, ADDRESS_YEAR, 0, "YEAR", 0, 99},
 };
 
 int mode = 0; // 0: view date and time; 1: edit date and time; 2: countdown
@@ -331,14 +332,17 @@ void buttonHandle() {
     	} else if (mode == 1) {
     		editIndex = 0;
     		setTimer(500, 0);
-    		tempValue = *(dateTimeInfo[0].showName);
+			for (int i = 0 ; i < 7 ; i++){
+				dateTimeInfo[i].stopValue = *(dateTimeInfo[i].showName);
+			}
+    		tempValue = dateTimeInfo[0].stopValue;
     	} else if (mode == 2) {
     		editIndex = 0;
     		setTimer(500, 0);
-    		tempValue = *(dateTimeInfo[0].showName);
     		for (int i = 0 ; i < 7 ; i++){
     			dateTimeInfo[i].countDown = *(dateTimeInfo[i].showName);
     		}
+    		tempValue = dateTimeInfo[0].countDown;
     	} else if (mode == 3) {
     		resetValues();
     		setTimer(500, 0);
@@ -389,7 +393,7 @@ void buttonHandle() {
 			if (mode == 1) ds3231_Write(dateTimeInfo[editIndex].writeName, tempValue);
 			else if (mode == 2) dateTimeInfo[editIndex].countDown = tempValue;
 			editIndex = (editIndex + 1) % 7;
-			tempValue = *(dateTimeInfo[editIndex].showName);
+			tempValue = dateTimeInfo[editIndex].stopValue;
 			lcd_Clear(BLACK);
 		}
     	break;
